@@ -30,4 +30,10 @@ defmodule RateLimit.Engine do
     max :: pos_integer,
     expire :: pos_integer
   ) :: {:ok, RateLimit.counter} | {:error, String.t}
+
+  @doc """
+  Callback to reset the specified counter to 0
+
+  """
+  @callback reset(id :: RateLimit.id) :: :ok | {:error, String.t}
 end

@@ -18,13 +18,16 @@ defmodule RateLimit do
 
   """
 
+  import RateLimit.Utils, only: [{:timestamp, 0}]
+
+
   @typedoc """
   An identifier for an individual rate limiter.
 
   """
   @type id :: String.t
 
-  @opaque counter :: {used_count :: non_neg_integer, reset_at :: pos_integer}
+  @type counter :: {id, used_count :: non_neg_integer, reset_at :: pos_integer}
 
   @type access_opt ::
     {:count, pos_integer} |
@@ -53,7 +56,16 @@ defmodule RateLimit do
     {count, max_reqs, reset_interval} =
       read_opts(opts)
 
-    @engine.incr(id, count, max_reqs, reset_interval)
+    @engine.incr(id, count, max_reqs, timestamp + reset_interval)
+  end
+
+  @doc """
+  Resets the counter to 0 for the specified ID.
+
+  """
+  @spec reset(id) :: :ok | {:error, String.t}
+  def reset(id) do
+    @engine.reset(id)
   end
 
   @spec read_opts([access_opt]) :: {pos_integer, non_neg_integer, pos_integer}
